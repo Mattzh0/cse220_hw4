@@ -1,7 +1,29 @@
 #include "hw4.h"
 
 void initialize_game(ChessGame *game) {
-    (void)game;
+    char board[8][8] = {
+        {'r','n','b','q','k','b','n','r'}, 
+        {'p','p','p','p','p','p','p','p'}, 
+        {'.','.','.','.','.','.','.','.'},
+        {'.','.','.','.','.','.','.','.'},
+        {'.','.','.','.','.','.','.','.'},
+        {'.','.','.','.','.','.','.','.'},
+        {'P','P','P','P','P','P','P','P'},
+        {'R','N','B','Q','K','B','N','R'}, 
+    };
+    int move_cnt = 0;
+    int capt_cnt = 0;
+    int current_player = 0; //0 = white, 1 = black
+    ChessMove moves[MAX_MOVES];
+    char capturedPieces[MAX_CAPTURED_PIECES] = {0};
+
+    memcpy(game->chessboard, board, sizeof(game->chessboard));
+    memcpy(game->moves, moves, sizeof(game->moves));
+    memcpy(game->capturedPieces, capturedPieces, sizeof(game->capturedPieces));
+    game->moveCount = move_cnt;
+    game->capturedCount = capt_cnt;
+    game->currentPlayer = current_player;
+
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
