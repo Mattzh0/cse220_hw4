@@ -32,12 +32,36 @@ void chessboard_to_fen(char fen[], ChessGame *game) {
 }
 
 bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
-    (void)piece;
-    (void)src_row;
-    (void)src_col;
-    (void)dest_row;
-    (void)dest_col;
-    (void)game;
+    if (piece == 'p') { //white player
+        if (dest_row == src_row + 1) {
+            if (game->chessboard[dest_row][dest_col] != '.') {
+                if ((dest_col == src_col - 1) || (dest_col == src_col + 1)) {
+                    return true;
+                }
+            }
+            else if (dest_col == src_col) {
+                return true;
+            }
+        }
+        else if (dest_row == src_row + 2 && src_row == 1 && game->chessboard[dest_row][dest_col] == '.') {
+            return true;
+        }
+    }
+    else if (piece == 'P') { //black player
+        if (dest_row == src_row - 1) {
+            if (game->chessboard[dest_row][dest_col] != '.') {
+                if ((dest_col == src_col - 1) || (dest_col == src_col + 1)) {
+                    return true;
+                }
+            }
+            else if (dest_col == src_col) {
+                return true;
+            }
+        }
+        else if (dest_row == src_row - 2 && src_row == 6 && game->chessboard[dest_row][dest_col] == '.') {
+            return true;
+        }
+    }
     return false;
 }
 
