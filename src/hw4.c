@@ -190,8 +190,31 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
-    (void)move;
-    (void)parsed_move;
+    if (strlen(move) < 4 || strlen(move) > 5 || (move[0] < 'a' || move[0] > 'h' || move[2] < 'a' || move[2] > 'h')) {
+        return PARSE_MOVE_INVALID_FORMAT;
+    }
+    if (move[1] < '1' || move[1] > '8' || move[3] < '1' || move[3] > '8') {
+        return PARSE_MOVE_OUT_OF_BOUNDS;
+    }
+    if (strlen(move) == 5) {
+        if ((move[1] == '7' && move[3] == '8') || (move[1] == '2' && move[3] == '1')) {
+            if (move[4] != 'q' && move[4] != 'r' && move[4] != 'b' && move[4] != 'n') {
+                return PARSE_MOVE_INVALID_PROMOTION;
+            }
+        } else {
+            return PARSE_MOVE_INVALID_DESTINATION;
+        }
+    }
+    strncpy(parsed_move->startSquare, move, 2);
+    parsed_move->startSquare[2] = '\0';
+    if (strlen(move) == 4) {
+        strncpy(parsed_move->endSquare, move + 2, 2);
+        parsed_move->endSquare[2] = '\0';
+    }
+    else if (strlen(move) == 5) {
+        strncpy(parsed_move->endSquare, move + 2, 3);
+        parsed_move->endSquare[3] = '\0';
+    }
     return -999;
 }
 
