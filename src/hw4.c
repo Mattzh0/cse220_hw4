@@ -223,9 +223,9 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     if (validate_move) {
         int start_piece_flag;
         int dest_piece_flag;
-        int start_row = 8 - (move->startSquare[1] - '1');
+        int start_row = '8' - move->startSquare[1];
         int start_col = move->startSquare[0] - 'a';
-        int end_row = 8 - (move->endSquare[1] - '1');
+        int end_row = '8' - move->endSquare[1];
         int end_col = move->endSquare[0] - 'a';
         char start_piece = game->chessboard[start_row][start_col];
         char dest_piece = game->chessboard[end_row][end_col];
@@ -277,6 +277,12 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         }
     }
 
+    //if nothing at dest_piece, set dest_piece to start_piece, set start_piece to empty
+    //if piece at dest_piece, set dest_piece to start_piece (capture), set start_piece to empty and update captured variables
+    //update moves array
+    //update all other variables
+
+    game->currentPlayer = 1 - game->currentPlayer;
     return 0;
 }
 
