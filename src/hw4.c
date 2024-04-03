@@ -218,12 +218,66 @@ int parse_move(const char *move, ChessMove *parsed_move) {
     return 0;
 }
 
+//client = white, server = black
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
-    (void)game;
-    (void)move;
-    (void)is_client;
-    (void)validate_move;
-    return -999;
+    if (validate_move) {
+        int start_piece_flag;
+        int dest_piece_flag;
+        int start_row = 8 - (move->startSquare[1] - '1');
+        int start_col = move->startSquare[0] - 'a';
+        int end_row = 8 - (move->endSquare[1] - '1');
+        int end_col = move->endSquare[0] - 'a';
+        char start_piece = game->chessboard[start_row][start_col];
+        char dest_piece = game->chessboard[end_row][end_col];
+
+        if (start_piece == 'P' || start_piece == 'R' || start_piece == 'N' || start_piece == 'B' || start_piece == 'Q' || start_piece == 'K') {
+            start_piece_flag = 0; //0 indicates the piece to be moved is white
+        }
+        else if (start_piece == 'p' || start_piece == 'r' || start_piece == 'n' || start_piece == 'b' || start_piece == 'q' || start_piece == 'k'){
+            start_piece_flag = 1; //1 indicates the piece to be moved is black
+        }
+        else if (start_piece == '.'){
+            start_piece_flag = 2; //2 indicates there is no piece to be moved
+        }
+        if (dest_piece == 'P' || dest_piece == 'R' || dest_piece == 'N' || dest_piece == 'B' || dest_piece == 'Q' || dest_piece == 'K') {
+            dest_piece_flag = 0; //0 indicates the piece to be captured is white
+        }
+        else if (dest_piece == 'p' || dest_piece == 'r' || dest_piece == 'n' || dest_piece == 'b' || dest_piece == 'q' || dest_piece == 'k'){
+            dest_piece_flag = 1; //1 indicates the piece to be captured is black
+        }
+        else if (dest_piece == '.'){
+            dest_piece_flag = 2; //2 indicates there is no piece at final location to be captured
+        }
+
+        if ((game->currentPlayer == 0 && !is_client) || (game->currentPlayer == 1 && is_client)) {
+            return MOVE_OUT_OF_TURN;
+        }
+        if (start_piece_flag == 2) {
+            return MOVE_NOTHING;
+        }
+        if ((game->currentPlayer == 0 && start_piece_flag == 1) || (game->currentPlayer == 1 && start_piece_flag == 0)) {
+            return MOVE_WRONG_COLOR;
+        }
+        if (start_piece_flag == dest_piece_flag) {
+            return MOVE_SUS;
+        }   
+        if (((strlen(move->startSquare) + strlen(move->endSquare)) == 5) && ((start_piece != 'P') && (start_piece != 'p'))) {
+            return MOVE_NOT_A_PAWN;
+        }
+        if ((strlen(move->startSquare) + strlen(move->endSquare)) == 4) {
+            if (start_piece == 'P' && end_row == 7) {
+                return MOVE_MISSING_PROMOTION;
+            }
+            else if (start_piece == 'p' && end_row == 0) {
+                return MOVE_MISSING_PROMOTION;
+            }
+        }
+        if (is_valid_move(start_piece, start_row, start_col, end_row, end_col, game) != 0) {
+            return MOVE_WRONG;
+        }
+    }
+
+    return 0;
 }
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
