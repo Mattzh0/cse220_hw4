@@ -215,7 +215,7 @@ int parse_move(const char *move, ChessMove *parsed_move) {
         strncpy(parsed_move->endSquare, move + 2, 3);
         parsed_move->endSquare[3] = '\0';
     }
-    return -999;
+    return 0;
 }
 
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
