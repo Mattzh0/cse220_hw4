@@ -1,5 +1,7 @@
 #include "hw4.h"
 
+int captured_index;
+int moves_index;
 void initialize_game(ChessGame *game) {
     char board[8][8] = {
         {'r','n','b','q','k','b','n','r'}, 
@@ -220,15 +222,15 @@ int parse_move(const char *move, ChessMove *parsed_move) {
 
 //client = white, server = black
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
+    int start_row = '8' - move->startSquare[1];
+    int start_col = move->startSquare[0] - 'a';
+    int end_row = '8' - move->endSquare[1];
+    int end_col = move->endSquare[0] - 'a';
+    char start_piece = game->chessboard[start_row][start_col];
+    char dest_piece = game->chessboard[end_row][end_col];
     if (validate_move) {
         int start_piece_flag;
         int dest_piece_flag;
-        int start_row = '8' - move->startSquare[1];
-        int start_col = move->startSquare[0] - 'a';
-        int end_row = '8' - move->endSquare[1];
-        int end_col = move->endSquare[0] - 'a';
-        char start_piece = game->chessboard[start_row][start_col];
-        char dest_piece = game->chessboard[end_row][end_col];
 
         if (start_piece == 'P' || start_piece == 'R' || start_piece == 'N' || start_piece == 'B' || start_piece == 'Q' || start_piece == 'K') {
             start_piece_flag = 0; //0 indicates the piece to be moved is white
@@ -277,11 +279,18 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         }
     }
 
-    //if nothing at dest_piece, set dest_piece to start_piece, set start_piece to empty
-    //if piece at dest_piece, set dest_piece to start_piece (capture), set start_piece to empty and update captured variables
-    //update moves array
-    //update all other variables
-
+    if (dest_piece == '.') {
+        game->chessboard[start_row][start_col] = '.';
+        game->chessboard[end_row][end_col] = start_piece;
+    }
+    else {
+        game->chessboard[start_row][start_col] = '.';
+        game->chessboard[end_row][end_col] = start_piece;
+        game->capturedCount++;
+        game->capturedPieces[captured_index++] = start_piece;
+    }
+    game->moveCount++;
+    game->moves[moves_index++] = *move;
     game->currentPlayer = 1 - game->currentPlayer;
     return 0;
 }
