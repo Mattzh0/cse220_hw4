@@ -228,6 +228,13 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     int end_col = move->endSquare[0] - 'a';
     char start_piece = game->chessboard[start_row][start_col];
     char dest_piece = game->chessboard[end_row][end_col];
+    int promo_flag;
+    if ((strlen(move->startSquare) + strlen(move->endSquare)) == 5) {
+        promo_flag = 1;
+    }
+    else if ((strlen(move->startSquare) + strlen(move->endSquare)) == 4) {
+        promo_flag = 0;
+    }
     if (validate_move) {
         int start_piece_flag;
         int dest_piece_flag;
@@ -263,10 +270,10 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         if (start_piece_flag == dest_piece_flag) {
             return MOVE_SUS;
         }   
-        if (((strlen(move->startSquare) + strlen(move->endSquare)) == 5) && ((start_piece != 'P') && (start_piece != 'p'))) {
+        if (promo_flag==1 && ((start_piece != 'P') && (start_piece != 'p'))) {
             return MOVE_NOT_A_PAWN;
         }
-        if ((strlen(move->startSquare) + strlen(move->endSquare)) == 4) {
+        if (promo_flag==0) {
             if (start_piece == 'P' && end_row == 7) {
                 return MOVE_MISSING_PROMOTION;
             }
@@ -274,12 +281,17 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
                 return MOVE_MISSING_PROMOTION;
             }
         }
-        if (is_valid_move(start_piece, start_row, start_col, end_row, end_col, game) != 0) {
+        if (is_valid_move(start_piece, start_row, start_col, end_row, end_col, game) != 1) {
+            printf("%d", is_valid_move(start_piece, start_row, start_col, end_row, end_col, game));
             return MOVE_WRONG;
         }
     }
 
-    if (dest_piece == '.') {
+    if (promo_flag==1) {
+        game->chessboard[start_row][start_col] = '.';
+        game->chessboard[end_row][end_col] = move->endSquare[2];
+    }
+    else if (dest_piece == '.') {
         game->chessboard[start_row][start_col] = '.';
         game->chessboard[end_row][end_col] = start_piece;
     }
@@ -291,7 +303,14 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     }
     game->moveCount++;
     game->moves[moves_index++] = *move;
-    game->currentPlayer = 1 - game->currentPlayer;
+
+    if (game->currentPlayer == WHITE_PLAYER) {
+        game->currentPlayer = BLACK_PLAYER;
+    }
+    else {
+        game->currentPlayer = WHITE_PLAYER;
+    }
+    //game->currentPlayer = 1 - game->currentPlayer;
     return 0;
 }
 
@@ -338,3 +357,15 @@ void display_chessboard(ChessGame *game) {
     }
     printf("  a b c d e f g h\n");
 }
+
+/* int main() {
+    ChessGame game;
+    initialize_game(&game);
+    ChessMove move;
+    parse_move("e2e4", &move);
+    int result = make_move(&game, &move, 1, 1);
+    display_chessboard(&game);
+
+
+    return 0;
+} */
