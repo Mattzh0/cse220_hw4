@@ -25,12 +25,39 @@ void initialize_game(ChessGame *game) {
     game->moveCount = move_cnt;
     game->capturedCount = capt_cnt;
     game->currentPlayer = current_player;
-
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
-    (void)fen;
-    (void)game;
+    int i, j, num_free;
+    for (i = 0; i < 8; i++) {
+        num_free = 0;
+        for (j = 0; j < 8; j++) {
+            if (game->chessboard[i][j] == '.') {
+                num_free++;
+            } 
+            else {
+                if (num_free != 0) {
+                    *fen++ = num_free + '0'; //need to add '0' for char type
+                    num_free = 0;
+                }
+                *fen++ = game->chessboard[i][j];
+            }
+        }
+        if (num_free != 0) {
+            *fen++ = num_free + '0';
+        }
+        if (i != 7) {
+            *fen++ = '/';
+        }
+    }
+    *fen++ = ' ';
+    if (game->currentPlayer == WHITE_PLAYER) {
+        *fen++ = 'w';
+    }
+    else if (game->currentPlayer == BLACK_PLAYER) {
+        *fen++ = 'b';
+    }
+    *fen = '\0';
 }
 
 bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
@@ -78,7 +105,6 @@ bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, Ch
         return false;
     }
     if (dest_row == src_row) { //potential vertical movement
-        //check if moves up or down
         if (dest_col > src_col) {
             for (int i = src_col+1; i <= dest_col; i++) {
                 if ((i != dest_col) && game->chessboard[dest_row][i] != '.') {
@@ -100,7 +126,6 @@ bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, Ch
         }
     }
     else if (dest_col == src_col) { //potential horizontal movement
-        //check if moves to the left or to the right
         if (dest_row > src_row) {
             for (int i = src_row+1; i <= dest_row; i++) {
                 if ((i != dest_row) && game->chessboard[i][dest_col] != '.') {
@@ -296,21 +321,14 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         game->chessboard[end_row][end_col] = start_piece;
     }
     else {
+        game->capturedCount++;
+        game->capturedPieces[captured_index++] = dest_piece;
         game->chessboard[start_row][start_col] = '.';
         game->chessboard[end_row][end_col] = start_piece;
-        game->capturedCount++;
-        game->capturedPieces[captured_index++] = start_piece;
     }
     game->moveCount++;
     game->moves[moves_index++] = *move;
-
-    if (game->currentPlayer == WHITE_PLAYER) {
-        game->currentPlayer = BLACK_PLAYER;
-    }
-    else {
-        game->currentPlayer = WHITE_PLAYER;
-    }
-    //game->currentPlayer = 1 - game->currentPlayer;
+    game->currentPlayer = 1 - game->currentPlayer;
     return 0;
 }
 
