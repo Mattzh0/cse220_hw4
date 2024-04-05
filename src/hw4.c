@@ -212,8 +212,32 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
 }
 
 void fen_to_chessboard(const char *fen, ChessGame *game) {
-    (void)fen;
-    (void)game;
+    int i = 0, j = 0, k = 0;
+    for (k = 0; fen[k] != ' '; k++) {
+        if (fen[k] == '/') {
+            i++;
+            j = 0;
+        } 
+        else if (isdigit(fen[k])) {
+            int num_empty = fen[k] - '0';
+            while (num_empty--) {
+                game->chessboard[i][j] = '.';
+                j++;
+            }
+        } 
+        else {
+            game->chessboard[i][j] = fen[k];
+            j++;
+        }
+    }
+    if (fen[k+1] == 'w') {
+        game->currentPlayer = 0;
+    }
+    else if (fen[k+1] == 'b') {
+        game->currentPlayer = 1;
+    }
+    game->moveCount = 0;
+    game->capturedCount = 0;
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
