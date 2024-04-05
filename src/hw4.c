@@ -338,7 +338,12 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
 
     if (promo_flag==1) {
         game->chessboard[start_row][start_col] = '.';
-        game->chessboard[end_row][end_col] = move->endSquare[2];
+        if (game->currentPlayer == WHITE_PLAYER) {
+            game->chessboard[end_row][end_col] = toupper(move->endSquare[2]);
+        }
+        else if (game->currentPlayer == BLACK_PLAYER) {
+            game->chessboard[end_row][end_col] = move->endSquare[2];
+        }
     }
     else if (dest_piece == '.') {
         game->chessboard[start_row][start_col] = '.';
