@@ -378,18 +378,39 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    return -999;
+    for (int i = 0; username[i]; i++) {
+        if (username[i] == ' ') {
+            return -1;
+        }
+    }
+    FILE *file = fopen(db_filename, "a");
+    char fen[256];
+    chessboard_to_fen(fen, game);
+    fprintf(file, "%s:%s\n", username, fen);
+    fclose(file);
+    return 0;
 }
 
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    (void)save_number;
-    return -999;
+    FILE *file = fopen(db_filename, "r");
+    char line[256];
+    int count = 0;
+    while (fgets(line, sizeof(line), file)) { //fgets will read until the newline
+        char *colon = strchr(line, ':'); //first possible occurrence of the colon
+        if (colon != NULL) {
+            *colon = '\0';
+            if (strcmp(line, username) == 0) {
+                count++;
+                if (count == save_number) {
+                    fen_to_chessboard(colon + 1, game);
+                    fclose(file);
+                    return 0;
+                }
+            }
+        }
+    }
+    fclose(file);
+    return -1;
 }
 
 void display_chessboard(ChessGame *game) {
