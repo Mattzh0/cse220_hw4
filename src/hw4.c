@@ -378,6 +378,9 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename) {
+    if (username[0] == '\0') {
+        return -1;
+    }
     for (int i = 0; username[i]; i++) {
         if (username[i] == ' ') {
             return -1;
